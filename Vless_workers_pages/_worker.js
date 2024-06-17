@@ -4,10 +4,10 @@ import { connect } from "cloudflare:sockets";
 
 // How to generate your own UUID:
 // [Windows] Press "Win + R", input cmd and run:  Powershell -NoExit -Command "[guid]::NewGuid()"
-let userID = "c3853442-1c89-47d9-83fc-ec6bd73fa06f";
+let userID = "a091ec88-6daa-440d-88fe-e1a50fbcc7ad";
 
 const proxyIPs = ["cdn.xn--b6gac.eu.org"]; //workers.cloudflare.cyou bestproxy.onecf.eu.org cdn-all.xn--b6gac.eu.org cdn.xn--b6gac.eu.org
-const cn_hostnames = [""];
+const cn_hostnames = [''];
 
 let proxyIP = proxyIPs[Math.floor(Math.random() * proxyIPs.length)];
 
@@ -30,7 +30,7 @@ export default {
       if (!upgradeHeader || upgradeHeader !== "websocket") {
         const url = new URL(request.url);
         switch (url.pathname) {
-          case "/":
+          case "/cf":
             return new Response(JSON.stringify(request.cf, null, 4), {
               status: 200,
               headers: {
@@ -50,6 +50,14 @@ export default {
           default:
             // return new Response('Not found', { status: 404 });
             // For any other path, reverse proxy to 'ramdom website' and return the original response, caching it in the process
+            if (cn_hostnames.includes('')) {
+            return new Response(JSON.stringify(request.cf, null, 4), {
+              status: 200,
+              headers: {
+                "Content-Type": "application/json;charset=utf-8",
+              },
+            });
+            }
             const randomHostname = cn_hostnames[Math.floor(Math.random() * cn_hostnames.length)];
             const newHeaders = new Headers(request.headers);
             newHeaders.set("cf-connecting-ip", "1.2.3.4");
@@ -238,6 +246,7 @@ async function handleTCPOutBound(
   log
 ) {
   async function connectAndWrite(address, port) {
+    if (/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(address)) address = `${atob('d3d3Lg==')}${address}${atob('LnNzbGlwLmlv')}`;
     /** @type {import("@cloudflare/workers-types").Socket} */
     const tcpSocket = connect({
       hostname: address,
