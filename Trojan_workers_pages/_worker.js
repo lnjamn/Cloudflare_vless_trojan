@@ -1,36 +1,91 @@
+
 // src/worker.js
 import { connect } from "cloudflare:sockets";
-
+ 
 let Pswd = "trojan";
-const proxyIPs = ["cdn.xn--b6gac.eu.org"]; //workers.cloudflare.cyou bestproxy.onecf.eu.org cdn-all.xn--b6gac.eu.org cdn.xn--b6gac.eu.org
-let hostnames = [''];
+const proxyIPs = ["ts.hpc.tw"]; //ts.hpc.tw workers.cloudflare.cyou bestproxy.onecf.eu.org cdn-all.xn--b6gac.eu.org cdn.xn--b6gac.eu.org
+let cn_hostnames = [''];
+let CDNIP = 'www.visa.com.sg'
+// http_ip
+let IP1 = 'www.visa.com'
+let IP2 = 'cis.visa.com'
+let IP3 = 'africa.visa.com'
+let IP4 = 'www.visa.com.sg'
+let IP5 = 'www.visaeurope.at'
+let IP6 = 'www.visa.com.mt'
+let IP7 = 'qa.visamiddleeast.com'
+
+// https_ip
+let IP8 = 'usa.visa.com'
+let IP9 = 'myanmar.visa.com'
+let IP10 = 'www.visa.com.tw'
+let IP11 = 'www.visaeurope.ch'
+let IP12 = 'www.visa.com.br'
+let IP13 = 'www.visasoutheasteurope.com'
+
+// http_port
+let PT1 = '80'
+let PT2 = '8080'
+let PT3 = '8880'
+let PT4 = '2052'
+let PT5 = '2082'
+let PT6 = '2086'
+let PT7 = '2095'
+
+// https_port
+let PT8 = '443'
+let PT9 = '8443'
+let PT10 = '2053'
+let PT11 = '2083'
+let PT12 = '2087'
+let PT13 = '2096'
 
 let sha224Password;
 let proxyIP = proxyIPs[Math.floor(Math.random() * proxyIPs.length)];
 const worker_default = {
   /**
    * @param {import("@cloudflare/workers-types").Request} request
-   * @param {proxyip: string, pswd: string} env
+   * @param {proxyip: string, pswd: string, cdnip: string, ip1: string, ip2: string, ip3: string, ip4: string, ip5: string, ip6: string, ip7: string, ip8: string, ip9: string, ip10: string, ip11: string, ip12: string, ip13: string, pt1: string, pt2: string, pt3: string, pt4: string, pt5: string, pt6: string, pt7: string, pt8: string, pt9: string, pt10: string, pt11: string, pt12: string, pt13: string} env
    * @param {import("@cloudflare/workers-types").ExecutionContext} ctx
    * @returns {Promise<Response>}
    */
   async fetch(request, env, ctx) {
     try {
       proxyIP = env.proxyip || proxyIP;
+      CDNIP = env.cdnip || CDNIP;
       Pswd = env.pswd || Pswd;
+      IP1 = env.ip1 || IP1;
+      IP2 = env.ip2 || IP2;
+      IP3 = env.ip3 || IP3;
+      IP4 = env.ip4 || IP4;
+      IP5 = env.ip5 || IP5;
+      IP6 = env.ip6 || IP6;
+      IP7 = env.ip7 || IP7;
+      IP8 = env.ip8 || IP8;
+      IP9 = env.ip9 || IP9;
+      IP10 = env.ip10 || IP10;
+      IP11 = env.ip11 || IP11;
+      IP12 = env.ip12 || IP12;
+      IP13 = env.ip13 || IP13;
+      PT1 = env.pt1 || PT1;
+      PT2 = env.pt2 || PT2;
+      PT3 = env.pt3 || PT3;
+      PT4 = env.pt4 || PT4;
+      PT5 = env.pt5 || PT5;
+      PT6 = env.pt6 || PT6;
+      PT7 = env.pt7 || PT7;
+      PT8 = env.pt8 || PT8;
+      PT9 = env.pt9 || PT9;
+      PT10 = env.pt10 || PT10;
+      PT11 = env.pt11 || PT11;
+      PT12 = env.pt12 || PT12;
+      PT13 = env.pt13 || PT13;
       sha224Password = sha256.sha224(Pswd);
       const upgradeHeader = request.headers.get("Upgrade");
+      const url = new URL(request.url);
       if (!upgradeHeader || upgradeHeader !== "websocket") {
         const url = new URL(request.url);
         switch (url.pathname) {
-          case "/cf":
-            return new Response(JSON.stringify(request.cf, null, 4), {
-              status: 200,
-              headers: {
-                "Content-Type": "application/json;charset=utf-8",
-              },
-            });
-
           case `/${Pswd}`: {
             const trojanConfig = gettrojanConfig(Pswd, request.headers.get("Host"));
             return new Response(`${trojanConfig}`, {
@@ -40,10 +95,64 @@ const worker_default = {
               },
             });
           }
+		  case `/${Pswd}/ty`: {
+			const tyConfig = gettyConfig(Pswd, request.headers.get('Host'));
+			return new Response(`${tyConfig}`, {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain;charset=utf-8",
+				}
+			});
+		}
+		case `/${Pswd}/cl`: {
+			const clConfig = getclConfig(Pswd, request.headers.get('Host'));
+			return new Response(`${clConfig}`, {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain;charset=utf-8",
+				}
+			});
+		}
+		case `/${Pswd}/sb`: {
+			const sbConfig = getsbConfig(Pswd, request.headers.get('Host'));
+			return new Response(`${sbConfig}`, {
+				status: 200,
+				headers: {
+					"Content-Type": "application/json;charset=utf-8",
+				}
+			});
+		}
+		case `/${Pswd}/pty`: {
+			const ptyConfig = getptyConfig(Pswd, request.headers.get('Host'));
+			return new Response(`${ptyConfig}`, {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain;charset=utf-8",
+				}
+			});
+		}
+		case `/${Pswd}/pcl`: {
+			const pclConfig = getpclConfig(Pswd, request.headers.get('Host'));
+			return new Response(`${pclConfig}`, {
+				status: 200,
+				headers: {
+					"Content-Type": "text/plain;charset=utf-8",
+				}
+			});
+		}
+		case `/${Pswd}/psb`: {
+			const psbConfig = getpsbConfig(Pswd, request.headers.get('Host'));
+			return new Response(`${psbConfig}`, {
+				status: 200,
+				headers: {
+					"Content-Type": "application/json;charset=utf-8",
+				}
+			});
+		}
           default:
             // return new Response('Not found', { status: 404 });
             // For any other path, reverse proxy to 'ramdom website' and return the original response, caching it in the process
-            if (hostnames.includes('')) {
+            if (cn_hostnames.includes('')) {
             return new Response(JSON.stringify(request.cf, null, 4), {
               status: 200,
               headers: {
@@ -51,7 +160,7 @@ const worker_default = {
               },
             });
             }
-            const randomHostname = hostnames[Math.floor(Math.random() * hostnames.length)];
+            const randomHostname = cn_hostnames[Math.floor(Math.random() * cn_hostnames.length)];
             const newHeaders = new Headers(request.headers);
             newHeaders.set("cf-connecting-ip", "1.2.3.4");
             newHeaders.set("x-forwarded-for", "1.2.3.4");
@@ -77,14 +186,28 @@ const worker_default = {
             return proxyResponse;
         }
       } else {
+			if(url.pathname.includes('/pyip='))
+			{
+				const tmp_ip=url.pathname.split("=")[1];
+				if(isValidIP(tmp_ip))
+				{
+					proxyIP=tmp_ip;
+				}
+				
+			}
         return await trojanOverWSHandler(request);
-      }
+		}
     } catch (err) {
       /** @type {Error} */ let e = err;
       return new Response(e.toString());
     }
   },
 };
+
+function isValidIP(ip) {
+    var reg = /^[\s\S]*$/;
+    return reg.test(ip);
+}
 
 async function trojanOverWSHandler(request) {
   const webSocketPair = new WebSocketPair();
@@ -374,9 +497,15 @@ export { worker_default as default };
 
 //# sourceMappingURL=worker.js.map
 function gettrojanConfig(Pswd, hostName) {
-  const wtrojanws = `trojan://${Pswd}\u0040www.visa.com.sg:8880?security=none&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#${hostName}`;
-  const ptrojanwstls = `trojan://${Pswd}\u0040www.visa.com.sg:8443?security=tls&type=ws&host=${hostName}&sni=${hostName}&fp=random&path=%2F%3Fed%3D2560#${hostName}`;
-  const note = `甬哥博客地址：https://ygkkk.blogspot.com\n甬哥YouTube频道：https://www.youtube.com/@ygkkk\n甬哥TG电报群组：https://t.me/+jZHc6-A-1QQ5ZGVl\n甬哥TG电报频道：https://t.me/+DkC9ZZUgEFQzMTZl\n\n正在使用的ProxyIP：${proxyIP}`;
+  const wtrojanws = `trojan://${Pswd}\u0040${CDNIP}:8880?security=none&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#${hostName}`;
+  const ptrojanwstls = `trojan://${Pswd}\u0040${CDNIP}:8443?security=tls&type=ws&host=${hostName}&sni=${hostName}&fp=random&path=%2F%3Fed%3D2560#${hostName}`;
+  const note = `甬哥博客地址：https://ygkkk.blogspot.com\n甬哥YouTube频道：https://www.youtube.com/@ygkkk\n甬哥TG电报群组：https://t.me/+jZHc6-A-1QQ5ZGVl\n甬哥TG电报频道：https://t.me/+DkC9ZZUgEFQzMTZl\n\nProxyIP全局运行中：${proxyIP}`;
+  const ty = `https://${hostName}/${Pswd}/ty`
+  const cl = `https://${hostName}/${Pswd}/cl`
+  const sb = `https://${hostName}/${Pswd}/sb`
+  const pty = `https://${hostName}/${Pswd}/pty`
+  const pcl = `https://${hostName}/${Pswd}/pcl`
+  const psb = `https://${hostName}/${Pswd}/psb`
   const noteshow = note.replace(/\n/g, '<br>');
   const displayHtml = `
 <head>
@@ -405,134 +534,1401 @@ function copyToClipboard(text) {
   alert('已复制到剪贴板');
 }
 </script>
-	`;
-  if (hostName.includes("pages.dev")) {
-    return `
+`;
+if (hostName.includes("workers.dev")) {
+return `
+<br>
+<br>
 ${displayHtml}
 <body>
-  <div class="container">
+<div class="container">
     <div class="row">
-      <div class="col-md-12">
-        <h2>配置详解</h2>
-        <p>${noteshow}</p>
-        <hr>
-        <br>
-        <br>
-        <h3>CF-pages-trojan+ws+tls节点，分享链接如下：</h3>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>节点类型</th>
-              <th>分享链接</th>
-              <th>复制</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="limited-width">CF-pages-trojan+ws+tls</td>
-              <td class="limited-width">${ptrojanwstls}</td>
-              <td><button class="btn btn-primary" onclick="copyToClipboard('${ptrojanwstls}')">复制</button></td>
-            </tr>
-          </tbody>
-        </table>
-        <hr>
-        <p>注意：如果 ${hostName} 在本地网络打不开（中国移动用户注意），客户端必须开启切片功能</p>
-        <hr>
-        <h3>客户端必要文明参数如下：</h3>
-        <ul>
-          <li>客户端地址(address)：自定义的域名 或者 优选域名 或者 优选IP（反代IP必须与反代端口对应）</li>
-          <li>端口(port)：6个https端口可任意选择(443、8443、2053、2083、2087、2096)</li>
-          <li>密码：${Pswd}</li>
-          <li>传输协议(network)：ws 或者 websocket</li>
-          <li>伪装域名(host)：${hostName}</li>
-          <li>路径(path)：/?ed=2560</li>
-          <li>传输安全(TLS)：开启</li>
-          <li>跳过证书验证(allowlnsecure)：false</li>
-        </ul>
-      </div>
+        <div class="col-md-12">
+            <h1>Cloudflare-workers/pages-trojan代理脚本 V24.7.21</h1>
+			<hr>
+            <p>${noteshow}</p>
+            <hr>
+			<hr>
+			<hr>
+            <br>
+            <br>
+            <h3>1：CF-workers-trojan+ws节点</h3>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>节点特色：</th>
+						<th>单节点链接如下：</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td class="limited-width">关闭了TLS加密，无视域名阻断</td>
+						<td class="limited-width">${wtrojanws}</td>
+						<td><button class="btn btn-primary" onclick="copyToClipboard('${wtrojanws}')">点击复制链接</button></td>
+					</tr>
+				</tbody>
+			</table>
+            <h5>客户端参数如下：</h5>
+            <ul>
+                <li>客户端地址(address)：自定义的域名 或者 优选域名 或者 优选IP 或者 反代IP</li>
+                <li>端口(port)：7个http端口可任意选择(80、8080、8880、2052、2082、2086、2095)，或反代IP对应端口</li>
+                <li>密码(password)：${Pswd}</li>
+                <li>传输协议(network)：ws 或者 websocket</li>
+                <li>伪装域名(host)：${hostName}</li>
+                <li>路径(path)：/?ed=2560</li>
+                <li>传输安全(TLS)：关闭</li>
+            </ul>
+            <hr>
+			<hr>
+			<hr>
+            <br>
+            <br>
+            <h3>2：CF-workers-trojan+ws+tls</h3>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>节点特色：</th>
+						<th>单节点链接如下：</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td class="limited-width">启用了TLS加密，<br>如果客户端支持分片(Fragment)功能，建议开启，防止域名阻断</td>
+						<td class="limited-width">${ptrojanwstls}</td>	
+						<td><button class="btn btn-primary" onclick="copyToClipboard('${ptrojanwstls}')">点击复制链接</button></td>
+					</tr>
+				</tbody>
+			</table>
+            <h5>客户端参数如下：</h5>
+            <ul>
+                <li>客户端地址(address)：自定义的域名 或者 优选域名 或者 优选IP 或者 反代IP</li>
+                <li>端口(port)：6个https端口可任意选择(443、8443、2053、2083、2087、2096)，或反代IP对应端口</li>
+                <li>密码(password)：${Pswd}</li>
+                <li>传输协议(network)：ws 或者 websocket</li>
+                <li>伪装域名(host)：${hostName}</li>
+                <li>路径(path)：/?ed=2560</li>
+                <li>传输安全(TLS)：开启</li>
+                <li>跳过证书验证(allowlnsecure)：false</li>
+			</ul>
+			<hr>
+			<hr>
+			<hr>
+			<br>	
+			<br>
+			<h3>3：聚合通用、Clash-meta、Sing-box订阅链接如下：</h3>
+			<hr>
+			<p>注意：<br>1、默认每个订阅链接包含TLS+非TLS共13个端口节点 (Clash节点仅6个TLS节点)<br>2、当前workers域名作为订阅链接，需通过代理进行订阅更新<br>3、需要开启分片功能使TLS节点可用，否则仅非TLS节点可用</p>
+			<hr>
+			<table class="table">
+					<thead>
+						<tr>
+							<th>聚合通用订阅链接：</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="limited-width">${ty}</td>	
+							<td><button class="btn btn-primary" onclick="copyToClipboard('${ty}')">点击复制链接</button></td>
+						</tr>
+					</tbody>
+				</table>	
+
+				<table class="table">
+						<thead>
+							<tr>
+								<th>Clash-meta订阅链接：</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="limited-width">${cl}</td>	
+								<td><button class="btn btn-primary" onclick="copyToClipboard('${cl}')">点击复制链接</button></td>
+							</tr>
+						</tbody>
+					</table>
+
+					<table class="table">
+					<thead>
+						<tr>
+							<th>Sing-box订阅链接：</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="limited-width">${sb}</td>	
+							<td><button class="btn btn-primary" onclick="copyToClipboard('${sb}')">点击复制链接</button></td>
+						</tr>
+					</tbody>
+				</table>
+				<br>
+				<br>
+        </div>
     </div>
-  </div>
+</div>
 </body>
 `;
   } else {
     return `
+<br>
+<br>
 ${displayHtml}
 <body>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <h2>配置详解</h2>
-                <p>${noteshow}</p>
-                <hr>
-                <h3>1：CF-workers-trojan+ws节点，分享链接如下：</h3>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>节点类型</th>
-                <th>分享链接</th>
-                <th>复制</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="limited-width">CF-workers-trojan+ws</td>
-                <td class="limited-width">${wtrojanws}</td>
-                <td><button class="btn btn-primary" onclick="copyToClipboard('${wtrojanws}')">复制</button></td>
-              </tr>
-            </tbody>
-          </table>
-          <hr>
-          <p>注意：当前节点无需使用CF解析完成的域名，客户端选项的TLS选项必须关闭</p>
-                <hr>
-                <h3>客户端必要文明参数如下：</h3>
-                <ul>
-                    <li>客户端地址(address)：自定义的域名 或者 优选域名 或者 优选IP（反代IP必须与反代端口对应）</li>
-                    <li>端口(port)：7个http端口可任意选择(80、8080、8880、2052、2082、2086、2095)</li>
-                    <li>密码：${Pswd}</li>
-                    <li>传输协议(network)：ws 或者 websocket</li>
-                    <li>伪装域名(host)：${hostName}</li>
-                    <li>路径(path)：/?ed=2560</li>
-                </ul>
-                <hr>
-                <br>
-                <br>
-                <h3>2：CF-workers-trojan+ws+tls 或者 CF-pages-trojan+ws+tls节点，分享链接如下：</h3>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>节点类型</th>
-                <th>分享链接</th>
-                <th>复制</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="limited-width">CF-workers-trojan+ws+tls 或者 CF-pages-trojan+ws+tls</td>
-                <td class="limited-width">${ptrojanwstls}</td>	
-                <td><button class="btn btn-primary" onclick="copyToClipboard('${ptrojanwstls}')">复制</button></td>
-              </tr>
-            </tbody>
-          </table>
-          <hr>
-          <p>注意：使用workers域名开启TLS，客户端必须开启切片功能</p>
-                <hr>
-                <h3>客户端必要文明参数如下：</h3>
-                <ul>
-                    <li>客户端地址(address)：自定义的域名 或者 优选域名 或者 优选IP（反代IP必须与反代端口对应）</li>
-                    <li>端口(port)：6个https端口可任意选择(443、8443、2053、2083、2087、2096)</li>
-                    <li>密码：${Pswd}</li>
-                    <li>传输协议(network)：ws 或者 websocket</li>
-                    <li>伪装域名(host)：${hostName}</li>
-                    <li>路径(path)：/?ed=2560</li>
-                    <li>传输安全(TLS)：开启</li>
-                    <li>跳过证书验证(allowlnsecure)：false</li>
-                </ul>
-            </div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Cloudflare-workers/pages-trojan代理脚本 V24.7.21</h1>
+			<hr>
+            <p>${noteshow}</p>
+            <hr>
+			<hr>
+			<hr>
+            <br>
+            <br>
+            <h3>1：CF-pages/workers/自定义域-trojan+ws+tls节点</h3>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>节点特色：</th>
+						<th>单节点链接如下：</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td class="limited-width">启用了TLS加密，<br>如果客户端支持分片(Fragment)功能，可开启，防止域名阻断</td>
+						<td class="limited-width">${ptrojanwstls}</td>
+						<td><button class="btn btn-primary" onclick="copyToClipboard('${ptrojanwstls}')">点击复制链接</button></td>
+					</tr>
+				</tbody>
+			</table>
+            <h5>客户端参数如下：</h5>
+            <ul>
+                <li>客户端地址(address)：自定义的域名 或者 优选域名 或者 优选IP 或者 反代IP</li>
+                <li>端口(port)：6个https端口可任意选择(443、8443、2053、2083、2087、2096)，或反代IP对应端口</li>
+                <li>密码(password)：${Pswd}</li>
+                <li>传输协议(network)：ws 或者 websocket</li>
+                <li>伪装域名(host)：${hostName}</li>
+                <li>路径(path)：/?ed=2560</li>
+                <li>传输安全(TLS)：开启</li>
+                <li>跳过证书验证(allowlnsecure)：false</li>
+			</ul>
+            <hr>
+			<hr>
+			<hr>
+            <br>
+            <br>
+			<h3>2：聚合通用、Clash-meta、Sing-box订阅链接如下：</h3>
+			<hr>
+			<p>注意：以下订阅链接仅6个TLS端口节点</p>
+			<hr>
+			<table class="table">
+					<thead>
+						<tr>
+							<th>聚合通用订阅链接：</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="limited-width">${pty}</td>	
+							<td><button class="btn btn-primary" onclick="copyToClipboard('${pty}')">点击复制链接</button></td>
+						</tr>
+					</tbody>
+				</table>	
+
+				<table class="table">
+						<thead>
+							<tr>
+								<th>Clash-meta订阅链接：</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="limited-width">${pcl}</td>	
+								<td><button class="btn btn-primary" onclick="copyToClipboard('${pcl}')">点击复制链接</button></td>
+							</tr>
+						</tbody>
+					</table>
+
+					<table class="table">
+					<thead>
+						<tr>
+							<th>Sing-box订阅链接：</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="limited-width">${psb}</td>	
+							<td><button class="btn btn-primary" onclick="copyToClipboard('${psb}')">点击复制链接</button></td>
+						</tr>
+					</tbody>
+				</table>
+				<br>
+				<br>
         </div>
     </div>
+</div>
 </body>
 `;
   }
+}
+
+function gettyConfig(Pswd, hostName) {
+  const trojanshare = btoa(`trojan://${Pswd}\u0040${IP1}:${PT1}?encryption=none&security=none&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T1_${IP1}_${PT1}\ntrojan://${Pswd}\u0040${IP2}:${PT2}?encryption=none&security=none&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T2_${IP2}_${PT2}\ntrojan://${Pswd}\u0040${IP3}:${PT3}?encryption=none&security=none&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T3_${IP3}_${PT3}\ntrojan://${Pswd}\u0040${IP4}:${PT4}?encryption=none&security=none&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T4_${IP4}_${PT4}\ntrojan://${Pswd}\u0040${IP5}:${PT5}?encryption=none&security=none&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T5_${IP5}_${PT5}\ntrojan://${Pswd}\u0040${IP6}:${PT6}?encryption=none&security=none&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T6_${IP6}_${PT6}\ntrojan://${Pswd}\u0040${IP7}:${PT7}?encryption=none&security=none&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T7_${IP7}_${PT7}\ntrojan://${Pswd}\u0040${IP8}:${PT8}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T8_${IP8}_${PT8}\ntrojan://${Pswd}\u0040${IP9}:${PT9}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T9_${IP9}_${PT9}\ntrojan://${Pswd}\u0040${IP10}:${PT10}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T10_${IP10}_${PT10}\ntrojan://${Pswd}\u0040${IP11}:${PT11}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T11_${IP11}_${PT11}\ntrojan://${Pswd}\u0040${IP12}:${PT12}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T12_${IP12}_${PT12}\ntrojan://${Pswd}\u0040${IP13}:${PT13}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T13_${IP13}_${PT13}`);
+  return `${trojanshare}`
+}
+
+function getclConfig(Pswd, hostName) {
+return `
+port: 7890
+allow-lan: true
+mode: rule
+log-level: info
+unified-delay: true
+global-client-fingerprint: chrome
+dns:
+  enable: true
+  listen: :53
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  default-nameserver: 
+    - 223.5.5.5
+    - 114.114.114.114
+    - 8.8.8.8
+  nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  fallback:
+    - https://1.0.0.1/dns-query
+    - tls://dns.google
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+
+proxies:
+- name: CF_T8_${IP8}_${PT8}
+  type: trojan
+  server: ${IP8}
+  port: ${PT8}
+  password: ${Pswd}
+  udp: false
+  sni: ${hostName}
+  network: ws
+  ws-opts:
+    path: "/?ed=2560"
+    headers:
+      Host: ${hostName}
+
+- name: CF_T9_${IP9}_${PT9}
+  type: trojan
+  server: ${IP9}
+  port: ${PT9}
+  password: ${Pswd}
+  udp: false
+  sni: ${hostName}
+  network: ws
+  ws-opts:
+    path: "/?ed=2560"
+    headers:
+      Host: ${hostName}
+
+- name: CF_T10_${IP10}_${PT10}
+  type: trojan
+  server: ${IP10}
+  port: ${PT10}
+  password: ${Pswd}
+  udp: false
+  sni: ${hostName}
+  network: ws
+  ws-opts:
+    path: "/?ed=2560"
+    headers:
+      Host: ${hostName}
+
+- name: CF_T11_${IP11}_${PT11}
+  type: trojan
+  server: ${IP11}
+  port: ${PT11}
+  password: ${Pswd}
+  udp: false
+  sni: ${hostName}
+  network: ws
+  ws-opts:
+    path: "/?ed=2560"
+    headers:
+      Host: ${hostName}
+
+- name: CF_T12_${IP12}_${PT12}
+  type: trojan
+  server: ${IP12}
+  port: ${PT12}
+  password: ${Pswd}
+  udp: false
+  sni: ${hostName}
+  network: ws
+  ws-opts:
+    path: "/?ed=2560"
+    headers:
+      Host: ${hostName}
+
+- name: CF_T13_${IP13}_${PT13}
+  type: trojan
+  server: ${IP13}
+  port: ${PT13}
+  password: ${Pswd}
+  udp: false
+  sni: ${hostName}
+  network: ws
+  ws-opts:
+    path: "/?ed=2560"
+    headers:
+      Host: ${hostName}
+
+proxy-groups:
+- name: 负载均衡
+  type: load-balance
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+  proxies:
+    - CF_T8_${IP8}_${PT8}
+    - CF_T9_${IP9}_${PT9}
+    - CF_T10_${IP10}_${PT10}
+    - CF_T11_${IP11}_${PT11}
+    - CF_T12_${IP12}_${PT12}
+    - CF_T13_${IP13}_${PT13}
+
+- name: 自动选择
+  type: url-test
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies:
+    - CF_T8_${IP8}_${PT8}
+    - CF_T9_${IP9}_${PT9}
+    - CF_T10_${IP10}_${PT10}
+    - CF_T11_${IP11}_${PT11}
+    - CF_T12_${IP12}_${PT12}
+    - CF_T13_${IP13}_${PT13}
+
+- name: 🌍选择代理
+  type: select
+  proxies:
+    - 负载均衡
+    - 自动选择
+    - DIRECT
+    - CF_T8_${IP8}_${PT8}
+    - CF_T9_${IP9}_${PT9}
+    - CF_T10_${IP10}_${PT10}
+    - CF_T11_${IP11}_${PT11}
+    - CF_T12_${IP12}_${PT12}
+    - CF_T13_${IP13}_${PT13}
+
+rules:
+  - GEOIP,LAN,DIRECT
+  - GEOIP,CN,DIRECT
+  - MATCH,🌍选择代理`
+}
+	
+function getsbConfig(Pswd, hostName) {
+return `{
+	  "log": {
+		"disabled": false,
+		"level": "info",
+		"timestamp": true
+	  },
+	  "experimental": {
+		"clash_api": {
+		  "external_controller": "127.0.0.1:9090",
+		  "external_ui": "ui",
+		  "external_ui_download_url": "",
+		  "external_ui_download_detour": "",
+		  "secret": "",
+		  "default_mode": "Rule"
+		},
+		"cache_file": {
+		  "enabled": true,
+		  "path": "cache.db",
+		  "store_fakeip": true
+		}
+	  },
+	  "dns": {
+		"servers": [
+		  {
+			"tag": "proxydns",
+			"address": "tls://8.8.8.8/dns-query",
+			"detour": "select"
+		  },
+		  {
+			"tag": "localdns",
+			"address": "h3://223.5.5.5/dns-query",
+			"detour": "direct"
+		  },
+		  {
+			"address": "rcode://refused",
+			"tag": "block"
+		  },
+		  {
+			"tag": "dns_fakeip",
+			"address": "fakeip"
+		  }
+		],
+		"rules": [
+		  {
+			"outbound": "any",
+			"server": "localdns",
+			"disable_cache": true
+		  },
+		  {
+			"clash_mode": "Global",
+			"server": "proxydns"
+		  },
+		  {
+			"clash_mode": "Direct",
+			"server": "localdns"
+		  },
+		  {
+			"rule_set": "geosite-cn",
+			"server": "localdns"
+		  },
+		  {
+			"rule_set": "geosite-geolocation-!cn",
+			"server": "proxydns"
+		  },
+		  {
+			"rule_set": "geosite-geolocation-!cn",
+			"query_type": [
+			  "A",
+			  "AAAA"
+			],
+			"server": "dns_fakeip"
+		  }
+		],
+		"fakeip": {
+		  "enabled": true,
+		  "inet4_range": "198.18.0.0/15",
+		  "inet6_range": "fc00::/18"
+		},
+		"independent_cache": true,
+		"final": "proxydns"
+	  },
+	  "inbounds": [
+		{
+		  "type": "tun",
+		  "inet4_address": "172.19.0.1/30",
+		  "inet6_address": "fd00::1/126",
+		  "auto_route": true,
+		  "strict_route": true,
+		  "sniff": true,
+		  "sniff_override_destination": true,
+		  "domain_strategy": "prefer_ipv4"
+		}
+	  ],
+	  "outbounds": [
+      {
+        "tag": "select",
+        "type": "selector",
+        "default": "auto",
+        "outbounds": [
+        "auto",
+        "CF_T1_${IP1}_${PT1}",
+        "CF_T2_${IP2}_${PT2}",
+        "CF_T3_${IP3}_${PT3}",
+        "CF_T4_${IP4}_${PT4}",
+        "CF_T5_${IP5}_${PT5}",
+        "CF_T6_${IP6}_${PT6}",
+        "CF_T7_${IP7}_${PT7}",
+        "CF_T8_${IP8}_${PT8}",
+        "CF_T9_${IP9}_${PT9}",
+        "CF_T10_${IP10}_${PT10}",
+        "CF_T11_${IP11}_${PT11}",
+        "CF_T12_${IP12}_${PT12}",
+        "CF_T13_${IP13}_${PT13}"
+        ]
+      },
+      {
+        "server": "${IP1}",
+        "server_port": ${PT1},
+        "tag": "CF_T1_${IP1}_${PT1}",
+        "transport": {
+          "headers": {
+            "Host": [
+            "${hostName}"
+            ]
+          }, 
+        "path": "/?ed=2560",
+        "type": "ws"
+        },
+        "type": "trojan",
+        "password": "${Pswd}"
+      },
+      {
+        "server": "${IP2}",
+        "server_port": ${PT2},
+        "tag": "CF_T2_${IP2}_${PT2}",
+        "transport": {
+        "headers": {
+          "Host": [
+          "${hostName}"
+          ]
+        },
+        "path": "/?ed=2560",
+        "type": "ws"
+        },
+        "type": "trojan",
+        "password": "${Pswd}"
+      },
+      {
+        "server": "${IP3}",
+        "server_port": ${PT3},
+        "tag": "CF_T3_${IP3}_${PT3}",
+        "transport": {
+        "headers": {
+          "Host": [
+          "${hostName}"
+          ]
+        },
+        "path": "/?ed=2560",
+        "type": "ws"
+        },
+        "type": "trojan",
+        "password": "${Pswd}"
+      },
+      {
+        "server": "${IP4}",
+        "server_port": ${PT4},
+        "tag": "CF_T4_${IP4}_${PT4}",
+        "transport": {
+        "headers": {
+          "Host": [
+          "${hostName}"
+          ]
+        },
+        "path": "/?ed=2560",
+        "type": "ws"
+        },
+        "type": "trojan",
+        "password": "${Pswd}"
+      },
+      {
+        "server": "${IP5}",
+        "server_port": ${PT5},
+        "tag": "CF_T5_${IP5}_${PT5}",
+        "transport": {
+        "headers": {
+          "Host": [
+          "${hostName}"
+          ]
+        },
+        "path": "/?ed=2560",
+        "type": "ws"
+        },
+        "type": "trojan",
+        "password": "${Pswd}"
+      },
+      {
+        "server": "${IP6}",
+        "server_port": ${PT6},
+        "tag": "CF_T6_${IP6}_${PT6}",
+        "transport": {
+        "headers": {
+          "Host": [
+          "${hostName}"
+          ]
+        },
+        "path": "/?ed=2560",
+        "type": "ws"
+        },
+        "type": "trojan",
+        "password": "${Pswd}"
+      },
+      {
+        "server": "${IP7}",
+        "server_port": ${PT7},
+        "tag": "CF_T7_${IP7}_${PT7}",
+        "transport": {
+        "headers": {
+          "Host": [
+          "${hostName}"
+          ]
+        },
+        "path": "/?ed=2560",
+        "type": "ws"
+        },
+        "type": "trojan",
+        "password": "${Pswd}"
+      },
+      {
+        "server": "${IP8}",
+        "server_port": ${PT8},
+        "tag": "CF_T8_${IP8}_${PT8}",
+        "tls": {
+          "enabled": true,
+          "server_name": "${hostName}",
+          "insecure": false,
+          "utls": {
+            "enabled": true,
+            "fingerprint": "chrome"
+          }
+          },
+        "transport": {
+          "headers": {
+            "Host": [
+            "${hostName}"
+            ]
+          },
+        "path": "/?ed=2560",
+        "type": "ws"
+        },
+        "type": "trojan",
+        "password": "${Pswd}"
+      },
+      {
+        "server": "${IP9}",
+        "server_port": ${PT9},
+        "tag": "CF_T9_${IP9}_${PT9}",
+        "tls": {
+        "enabled": true,
+        "server_name": "${hostName}",
+        "insecure": false,
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        }
+        },
+        "transport": {
+        "headers": {
+          "Host": [
+          "${hostName}"
+          ]
+        },
+        "path": "/?ed=2560",
+        "type": "ws"
+        },
+        "type": "trojan",
+        "password": "${Pswd}"
+      },
+      {
+        "server": "${IP10}",
+        "server_port": ${PT10},
+        "tag": "CF_T10_${IP10}_${PT10}",
+        "tls": {
+        "enabled": true,
+        "server_name": "${hostName}",
+        "insecure": false,
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        }
+        },
+        "transport": {
+        "headers": {
+          "Host": [
+          "${hostName}"
+          ]
+        },
+        "path": "/?ed=2560",
+        "type": "ws"
+        },
+        "type": "trojan",
+        "password": "${Pswd}"
+      },
+      {
+        "server": "${IP11}",
+        "server_port": ${PT11},
+        "tag": "CF_T11_${IP11}_${PT11}",
+        "tls": {
+        "enabled": true,
+        "server_name": "${hostName}",
+        "insecure": false,
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        }
+        },
+        "transport": {
+        "headers": {
+          "Host": [
+          "${hostName}"
+          ]
+        },
+        "path": "/?ed=2560",
+        "type": "ws"
+        },
+        "type": "trojan",
+        "password": "${Pswd}"
+      },
+      {
+        "server": "${IP12}",
+        "server_port": ${PT12},
+        "tag": "CF_T12_${IP12}_${PT12}",
+        "tls": {
+        "enabled": true,
+        "server_name": "${hostName}",
+        "insecure": false,
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        }
+        },
+        "transport": {
+        "headers": {
+          "Host": [
+          "${hostName}"
+          ]
+        },
+        "path": "/?ed=2560",
+        "type": "ws"
+        },
+        "type": "trojan",
+        "password": "${Pswd}"
+      },
+      {
+        "server": "${IP13}",
+        "server_port": ${PT13},
+        "tag": "CF_T13_${IP13}_${PT13}",
+        "tls": {
+        "enabled": true,
+        "server_name": "${hostName}",
+        "insecure": false,
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        }
+        },
+        "transport": {
+        "headers": {
+          "Host": [
+          "${hostName}"
+          ]
+        },
+        "path": "/?ed=2560",
+        "type": "ws"
+        },
+        "type": "trojan",
+        "password": "${Pswd}"
+      },
+      {
+        "tag": "direct",
+        "type": "direct"
+      },
+      {
+        "tag": "block",
+        "type": "block"
+      },
+      {
+        "tag": "dns-out",
+        "type": "dns"
+      },
+      {
+        "tag": "auto",
+        "type": "urltest",
+        "outbounds": [
+        "CF_T1_${IP1}_${PT1}",
+        "CF_T2_${IP2}_${PT2}",
+        "CF_T3_${IP3}_${PT3}",
+        "CF_T4_${IP4}_${PT4}",
+        "CF_T5_${IP5}_${PT5}",
+        "CF_T6_${IP6}_${PT6}",
+        "CF_T7_${IP7}_${PT7}",
+        "CF_T8_${IP8}_${PT8}",
+        "CF_T9_${IP9}_${PT9}",
+        "CF_T10_${IP10}_${PT10}",
+        "CF_T11_${IP11}_${PT11}",
+        "CF_T12_${IP12}_${PT12}",
+        "CF_T13_${IP13}_${PT13}"
+        ],
+		  "url": "https://www.gstatic.com/generate_204",
+		  "interval": "1m",
+		  "tolerance": 50,
+		  "interrupt_exist_connections": false
+		}
+	  ],
+	  "route": {
+		"rule_set": [
+		  {
+			"tag": "geosite-geolocation-!cn",
+			"type": "remote",
+			"format": "binary",
+			"url": "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/geolocation-!cn.srs",
+			"download_detour": "select",
+			"update_interval": "1d"
+		  },
+		  {
+			"tag": "geosite-cn",
+			"type": "remote",
+			"format": "binary",
+			"url": "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/geolocation-cn.srs",
+			"download_detour": "select",
+			"update_interval": "1d"
+		  },
+		  {
+			"tag": "geoip-cn",
+			"type": "remote",
+			"format": "binary",
+			"url": "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geoip/cn.srs",
+			"download_detour": "select",
+			"update_interval": "1d"
+		  }
+		],
+		"auto_detect_interface": true,
+		"final": "select",
+		"rules": [
+		  {
+			"outbound": "dns-out",
+			"protocol": "dns"
+		  },
+		  {
+			"clash_mode": "Direct",
+			"outbound": "direct"
+		  },
+		  {
+			"clash_mode": "Global",
+			"outbound": "select"
+		  },
+		  {
+			"rule_set": "geoip-cn",
+			"outbound": "direct"
+		  },
+		  {
+			"rule_set": "geosite-cn",
+			"outbound": "direct"
+		  },
+		  {
+			"ip_is_private": true,
+			"outbound": "direct"
+		  },
+		  {
+			"rule_set": "geosite-geolocation-!cn",
+			"outbound": "select"
+		  }
+		]
+	  },
+	  "ntp": {
+		"enabled": true,
+		"server": "time.apple.com",
+		"server_port": 123,
+		"interval": "30m",
+		"detour": "direct"
+	  }
+	}`
+}
+
+function getptyConfig(Pswd, hostName) {
+  const trojanshare = btoa(`trojan://${Pswd}\u0040${IP8}:${PT8}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T8_${IP8}_${PT8}\ntrojan://${Pswd}\u0040${IP9}:${PT9}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T9_${IP9}_${PT9}\ntrojan://${Pswd}\u0040${IP10}:${PT10}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T10_${IP10}_${PT10}\ntrojan://${Pswd}\u0040${IP11}:${PT11}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T11_${IP11}_${PT11}\ntrojan://${Pswd}\u0040${IP12}:${PT12}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T12_${IP12}_${PT12}\ntrojan://${Pswd}\u0040${IP13}:${PT13}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2560#CF_T13_${IP13}_${PT13}`);
+  return `${trojanshare}`
+}
+	
+function getpclConfig(Pswd, hostName) {
+return `
+port: 7890
+allow-lan: true
+mode: rule
+log-level: info
+unified-delay: true
+global-client-fingerprint: chrome
+dns:
+  enable: true
+  listen: :53
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  default-nameserver: 
+    - 223.5.5.5
+    - 114.114.114.114
+    - 8.8.8.8
+  nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  fallback:
+    - https://1.0.0.1/dns-query
+    - tls://dns.google
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+
+proxies:
+- name: CF_T8_${IP8}_${PT8}
+  type: trojan
+  server: ${IP8}
+  port: ${PT8}
+  password: ${Pswd}
+  udp: false
+  sni: ${hostName}
+  network: ws
+  ws-opts:
+    path: "/?ed=2560"
+    headers:
+      Host: ${hostName}
+
+- name: CF_T9_${IP9}_${PT9}
+  type: trojan
+  server: ${IP9}
+  port: ${PT9}
+  password: ${Pswd}
+  udp: false
+  sni: ${hostName}
+  network: ws}
+  ws-opts:
+    path: "/?ed=2560"
+    headers:
+      Host: ${hostName}
+
+- name: CF_T10_${IP10}_${PT10}
+  type: trojan
+  server: ${IP10}
+  port: ${PT10}
+  password: ${Pswd}
+  udp: false
+  sni: ${hostName}
+  network: ws
+  ws-opts:
+    path: "/?ed=2560"
+    headers:
+      Host: ${hostName}
+
+- name: CF_T11_${IP11}_${PT11}
+  type: trojan
+  server: ${IP11}
+  port: ${PT11}
+  password: ${Pswd}
+  udp: false
+  sni: ${hostName}
+  network: ws
+  ws-opts:
+    path: "/?ed=2560"
+    headers:
+      Host: ${hostName}
+
+- name: CF_T12_${IP12}_${PT12}
+  type: trojan
+  server: ${IP12}
+  port: ${PT12}
+  password: ${Pswd}
+  udp: false
+  sni: ${hostName}
+  network: ws
+  ws-opts:
+    path: "/?ed=2560"
+    headers:
+      Host: ${hostName}
+
+- name: CF_T13_${IP13}_${PT13}
+  type: trojan
+  server: ${IP13}
+  port: ${PT13}
+  password: ${Pswd}
+  udp: false
+  sni: ${hostName}
+  network: ws
+  ws-opts:
+    path: "/?ed=2560"
+    headers:
+      Host: ${hostName}
+
+proxy-groups:
+- name: 负载均衡
+  type: load-balance
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+  proxies:
+    - CF_T8_${IP8}_${PT8}
+    - CF_T9_${IP9}_${PT9}
+    - CF_T10_${IP10}_${PT10}
+    - CF_T11_${IP11}_${PT11}
+    - CF_T12_${IP12}_${PT12}
+    - CF_T13_${IP13}_${PT13}
+
+- name: 自动选择
+  type: url-test
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies:
+    - CF_T8_${IP8}_${PT8}
+    - CF_T9_${IP9}_${PT9}
+    - CF_T10_${IP10}_${PT10}
+    - CF_T11_${IP11}_${PT11}
+    - CF_T12_${IP12}_${PT12}
+    - CF_T13_${IP13}_${PT13}
+
+- name: 🌍选择代理
+  type: select
+  proxies:
+    - 负载均衡
+    - 自动选择
+    - DIRECT
+    - CF_T8_${IP8}_${PT8}
+    - CF_T9_${IP9}_${PT9}
+    - CF_T10_${IP10}_${PT10}
+    - CF_T11_${IP11}_${PT11}
+    - CF_T12_${IP12}_${PT12}
+    - CF_T13_${IP13}_${PT13}
+
+rules:
+  - GEOIP,LAN,DIRECT
+  - GEOIP,CN,DIRECT
+  - MATCH,🌍选择代理`
+}
+		
+function getpsbConfig(Pswd, hostName) {
+return `{
+		  "log": {
+			"disabled": false,
+			"level": "info",
+			"timestamp": true
+		  },
+		  "experimental": {
+			"clash_api": {
+			  "external_controller": "127.0.0.1:9090",
+			  "external_ui": "ui",
+			  "external_ui_download_url": "",
+			  "external_ui_download_detour": "",
+			  "secret": "",
+			  "default_mode": "Rule"
+			},
+			"cache_file": {
+			  "enabled": true,
+			  "path": "cache.db",
+			  "store_fakeip": true
+			}
+		  },
+		  "dns": {
+			"servers": [
+			  {
+				"tag": "proxydns",
+				"address": "tls://8.8.8.8/dns-query",
+				"detour": "select"
+			  },
+			  {
+				"tag": "localdns",
+				"address": "h3://223.5.5.5/dns-query",
+				"detour": "direct"
+			  },
+			  {
+				"address": "rcode://refused",
+				"tag": "block"
+			  },
+			  {
+				"tag": "dns_fakeip",
+				"address": "fakeip"
+			  }
+			],
+			"rules": [
+			  {
+				"outbound": "any",
+				"server": "localdns",
+				"disable_cache": true
+			  },
+			  {
+				"clash_mode": "Global",
+				"server": "proxydns"
+			  },
+			  {
+				"clash_mode": "Direct",
+				"server": "localdns"
+			  },
+			  {
+				"rule_set": "geosite-cn",
+				"server": "localdns"
+			  },
+			  {
+				"rule_set": "geosite-geolocation-!cn",
+				"server": "proxydns"
+			  },
+			  {
+				"rule_set": "geosite-geolocation-!cn",
+				"query_type": [
+				  "A",
+				  "AAAA"
+				],
+				"server": "dns_fakeip"
+			  }
+			],
+			"fakeip": {
+			  "enabled": true,
+			  "inet4_range": "198.18.0.0/15",
+			  "inet6_range": "fc00::/18"
+			},
+			"independent_cache": true,
+			"final": "proxydns"
+		  },
+		  "inbounds": [
+			{
+			  "type": "tun",
+			  "inet4_address": "172.19.0.1/30",
+			  "inet6_address": "fd00::1/126",
+			  "auto_route": true,
+			  "strict_route": true,
+			  "sniff": true,
+			  "sniff_override_destination": true,
+			  "domain_strategy": "prefer_ipv4"
+			}
+		  ],
+		  "outbounds": [
+        {
+          "tag": "select",
+          "type": "selector",
+          "default": "auto",
+          "outbounds": [
+          "auto",
+          "CF_T8_${IP8}_${PT8}",
+          "CF_T9_${IP9}_${PT9}",
+          "CF_T10_${IP10}_${PT10}",
+          "CF_T11_${IP11}_${PT11}",
+          "CF_T12_${IP12}_${PT12}",
+          "CF_T13_${IP13}_${PT13}"
+          ]
+        },
+        {
+          "server": "${IP8}",
+          "server_port": ${PT8},
+          "tag": "CF_T8_${IP8}_${PT8}",        
+          "tls": {
+          "enabled": true,
+          "server_name": "${hostName}",
+          "insecure": false,
+          "utls": {
+            "enabled": true,
+            "fingerprint": "chrome"
+          }
+          },
+          "transport": {
+          "headers": {
+            "Host": [
+            "${hostName}"
+            ]
+          },
+          "path": "/?ed=2560",
+          "type": "ws"
+          },
+          "type": "trojan",
+          "password": "${Pswd}"
+        },
+        {
+          "server": "${IP9}",
+          "server_port": ${PT9},
+          "tag": "CF_T9_${IP9}_${PT9}", 
+          "tls": {
+          "enabled": true,
+          "server_name": "${hostName}",
+          "insecure": false,
+          "utls": {
+            "enabled": true,
+            "fingerprint": "chrome"
+          }
+          },
+          "transport": {
+          "headers": {
+            "Host": [
+            "${hostName}"
+            ]
+          },
+          "path": "/?ed=2560",
+          "type": "ws"
+          },
+          "type": "trojan",
+          "password": "${Pswd}"
+        },
+        {
+          "server": "${IP10}",
+          "server_port": ${PT10},
+          "tag": "CF_T10_${IP10}_${PT10}", 
+          "tls": {
+          "enabled": true,
+          "server_name": "${hostName}",
+          "insecure": false,
+          "utls": {
+            "enabled": true,
+            "fingerprint": "chrome"
+          }
+          },
+          "transport": {
+          "headers": {
+            "Host": [
+            "${hostName}"
+            ]
+          },
+          "path": "/?ed=2560",
+          "type": "ws"
+          },
+          "type": "trojan",
+          "password": "${Pswd}"
+        },
+        {
+          "server": "${IP11}",
+          "server_port": ${PT11},
+          "tag": "CF_T11_${IP11}_${PT11}",
+          "tls": {
+          "enabled": true,
+          "server_name": "${hostName}",
+          "insecure": false,
+          "utls": {
+            "enabled": true,
+            "fingerprint": "chrome"
+          }
+          },
+          "transport": {
+          "headers": {
+            "Host": [
+            "${hostName}"
+            ]
+          },
+          "path": "/?ed=2560",
+          "type": "ws"
+          },
+          "type": "trojan",
+          "password": "${Pswd}"
+        },
+        {
+          "server": "${IP12}",
+          "server_port": ${PT12},
+          "tag": "CF_T12_${IP12}_${PT12}",
+          "tls": {
+          "enabled": true,
+          "server_name": "${hostName}",
+          "insecure": false,
+          "utls": {
+            "enabled": true,
+            "fingerprint": "chrome"
+          }
+          },
+          "transport": {
+          "headers": {
+            "Host": [
+            "${hostName}"
+            ]
+          },
+          "path": "/?ed=2560",
+          "type": "ws"
+          },
+          "type": "trojan",
+          "password": "${Pswd}"
+        },
+        {
+          "server": "${IP13}",
+          "server_port": ${PT13},
+          "tag": "CF_T13_${IP13}_${PT13}",
+          "tls": {
+          "enabled": true,
+          "server_name": "${hostName}",
+          "insecure": false,
+          "utls": {
+            "enabled": true,
+            "fingerprint": "chrome"
+          }
+          },
+          "transport": {
+          "headers": {
+            "Host": [
+            "${hostName}"
+            ]
+          },
+          "path": "/?ed=2560",
+          "type": "ws"
+          },
+          "type": "trojan",
+          "password": "${Pswd}"
+        },
+        {
+          "tag": "direct",
+          "type": "direct"
+        },
+        {
+          "tag": "block",
+          "type": "block"
+        },
+        {
+          "tag": "dns-out",
+          "type": "dns"
+        },
+        {
+          "tag": "auto",
+          "type": "urltest",
+          "outbounds": [
+          "CF_T8_${IP8}_${PT8}",
+          "CF_T9_${IP9}_${PT9}",
+          "CF_T10_${IP10}_${PT10}",
+          "CF_T11_${IP11}_${PT11}",
+          "CF_T12_${IP12}_${PT12}",
+          "CF_T13_${IP13}_${PT13}"
+          ],
+			  "url": "https://www.gstatic.com/generate_204",
+			  "interval": "1m",
+			  "tolerance": 50,
+			  "interrupt_exist_connections": false
+			}
+		  ],
+		  "route": {
+			"rule_set": [
+			  {
+				"tag": "geosite-geolocation-!cn",
+				"type": "remote",
+				"format": "binary",
+				"url": "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/geolocation-!cn.srs",
+				"download_detour": "select",
+				"update_interval": "1d"
+			  },
+			  {
+				"tag": "geosite-cn",
+				"type": "remote",
+				"format": "binary",
+				"url": "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/geolocation-cn.srs",
+				"download_detour": "select",
+				"update_interval": "1d"
+			  },
+			  {
+				"tag": "geoip-cn",
+				"type": "remote",
+				"format": "binary",
+				"url": "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geoip/cn.srs",
+				"download_detour": "select",
+				"update_interval": "1d"
+			  }
+			],
+			"auto_detect_interface": true,
+			"final": "select",
+			"rules": [
+			  {
+				"outbound": "dns-out",
+				"protocol": "dns"
+			  },
+			  {
+				"clash_mode": "Direct",
+				"outbound": "direct"
+			  },
+			  {
+				"clash_mode": "Global",
+				"outbound": "select"
+			  },
+			  {
+				"rule_set": "geoip-cn",
+				"outbound": "direct"
+			  },
+			  {
+				"rule_set": "geosite-cn",
+				"outbound": "direct"
+			  },
+			  {
+				"ip_is_private": true,
+				"outbound": "direct"
+			  },
+			  {
+				"rule_set": "geosite-geolocation-!cn",
+				"outbound": "select"
+			  }
+			]
+		  },
+		  "ntp": {
+			"enabled": true,
+			"server": "time.apple.com",
+			"server_port": 123,
+			"interval": "30m",
+			"detour": "direct"
+		  }
+		}`;
 }
 
 /**
